@@ -75,6 +75,7 @@
         #tradingview-widget-container {
             flex-grow: 1;
             width: 100%;
+            height: 100%; /* Asegura que el contenedor del widget tenga una altura definida */
         }
     </style>
 </head>
@@ -118,7 +119,10 @@
         </div>
         
         <!-- Este div es el ancla donde TradingView creará su widget -->
-        <div id="tradingview-widget-container"></div>
+        <div id="tradingview-widget-container">
+            <!-- El script de TradingView necesita esta estructura interna -->
+            <div class="tradingview-widget-container__widget"></div>
+        </div>
     </div>
 
     <script>
@@ -135,11 +139,14 @@
             // Log para depuración
             console.log("Actualizando Heatmap con:", { theme, range, grid, sort });
 
-            // 1. Obtener el contenedor del widget.
+            // 1. Obtener el contenedor principal del widget.
             const container = document.getElementById('tradingview-widget-container');
             
-            // 2. Limpiar el contenido anterior. Esto es CRUCIAL para recargar el widget.
+            // 2. Limpiar el contenido anterior para evitar duplicados.
+            //    Mantenemos el div interno 'tradingview-widget-container__widget'.
+            const innerWidgetContainer = container.querySelector('.tradingview-widget-container__widget');
             container.innerHTML = '';
+            container.appendChild(innerWidgetContainer);
             
             // 3. Crear un nuevo elemento <script> para el widget de TradingView.
             const script = document.createElement('script');
@@ -148,9 +155,10 @@
             script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-forex-heat-map.js';
             
             // 4. Definir la configuración del widget con los valores seleccionados.
+            //    Usamos una altura fija para el widget para asegurar que se renderice correctamente.
             script.innerHTML = JSON.stringify({
                 "width": "100%",
-                "height": "100%",
+                "height": 500, // Altura fija para el widget en píxeles
                 "locale": "es",
                 "colorTheme": theme,
                 "dateRange": range,
@@ -162,7 +170,7 @@
                 "chartType": "area"
             });
             
-            // 5. Añadir el nuevo script al contenedor para que se cargue.
+            // 5. Añadir el nuevo script al contenedor principal.
             container.appendChild(script);
         }
 
